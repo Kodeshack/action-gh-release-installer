@@ -1,0 +1,29 @@
+name: Install GitHub Release
+author: Robin Thrift
+description: Install binaries from GitHub releases
+branding:
+  icon: play
+  color: blue
+inputs:
+  owner:
+    description: Repository owner user or org
+    required: true
+  repo:
+    description: Repository name
+    required: true
+  version:
+    description: Specify the release version to install
+    required: true
+  bin:
+    description: Binary file (path) to install from the downloaded archive. Will use the repo name if not set.
+    required: false
+  test:
+    description: Test command to run to test the binary, e.g. `limactl -v`.
+    required: false
+  github-token:
+    description: Github token for authenticated downloads or to prevent rate limiting
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: node16
+  main: dist/index.js

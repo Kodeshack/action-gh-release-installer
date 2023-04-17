@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "outDir": "build",
+        "incremental": true,
+
+        "target": "es2020",
+        "module": "commonjs",
+
+        "useDefineForClassFields": false,
+
+        "resolveJsonModule": true,
+
+        "allowJs": true,
+        "checkJs": false,
+        "maxNodeModuleJsDepth": 1,
+
+        "declaration": true,
+        "declarationMap": false,
+        "sourceMap": true,
+        "stripInternal": true,
+
+        "moduleResolution": "node",
+        "isolatedModules": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+
+        "strict": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false
+    }
+}
