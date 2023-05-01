@@ -65,6 +65,37 @@ async function test_just(tmpdir: string, runnerToolCache: string) {
     return res.stdout
 }
 
+async function test_staticcheck(tmpdir: string, runnerToolCache: string) {
+    let target = RunTarget.mainJs("action.yml")
+    let options = RunOptions.create({
+        tempDir: tmpdir,
+        githubServiceEnv: {
+            RUNNER_TOOL_CACHE: runnerToolCache,
+        },
+        fakeFsOptions: {
+            tmpRootDir: tmpdir,
+        },
+        inputs: {
+            owner: "dominikh",
+            repo: "go-tools",
+            version: "2023.1.3",
+            bin: "staticcheck",
+            test: "staticcheck -version",
+            "github-token": process.env["GITHUB_TOKEN"],
+        },
+    })
+
+    let res = await target.run(options)
+
+    assert(res.error == undefined)
+    assert(res.isSuccess)
+    assert(res.exitCode !== 1)
+
+    assert(res.commands.addedPaths.find((p) => p.includes("staticcheck")) != undefined)
+
+    return res.stdout
+}
+
 async function testNoCache() {
     console.log("================")
     console.log(" TEST: No Cache ")
@@ -77,6 +108,7 @@ async function testNoCache() {
     try {
         await test_limactl(tmpdir, runnerToolCache)
         await test_just(tmpdir, runnerToolCache)
+        await test_staticcheck(tmpdir, runnerToolCache)
     } finally {
         await fs.rm(tmpdir, { recursive: true })
     }
@@ -95,9 +127,14 @@ async function testWithCache() {
         await test_limactl(tmpdir, runnerToolCache)
         let secondRun = await test_limactl(tmpdir, runnerToolCache)
         assert(secondRun?.includes("Found tool in cache limactl 0.15.1 arm64"))
+
         await test_just(tmpdir, runnerToolCache)
         secondRun = await test_just(tmpdir, runnerToolCache)
         assert(secondRun?.includes("Found tool in cache just 1.13.0 arm64"))
+
+        await test_staticcheck(tmpdir, runnerToolCache)
+        secondRun = await test_staticcheck(tmpdir, runnerToolCache)
+        assert(secondRun?.includes("Found tool in cache staticcheck 2023.1.3 arm64"))
     } finally {
         await fs.rm(tmpdir, { recursive: true })
     }

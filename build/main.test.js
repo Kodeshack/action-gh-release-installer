@@ -59,6 +59,32 @@ async function test_just(tmpdir, runnerToolCache) {
     (0, assert_1.default)(res.commands.addedPaths.find((p) => p.includes("just")) != undefined);
     return res.stdout;
 }
+async function test_staticcheck(tmpdir, runnerToolCache) {
+    let target = github_action_ts_run_api_1.RunTarget.mainJs("action.yml");
+    let options = github_action_ts_run_api_1.RunOptions.create({
+        tempDir: tmpdir,
+        githubServiceEnv: {
+            RUNNER_TOOL_CACHE: runnerToolCache,
+        },
+        fakeFsOptions: {
+            tmpRootDir: tmpdir,
+        },
+        inputs: {
+            owner: "dominikh",
+            repo: "go-tools",
+            version: "2023.1.3",
+            bin: "staticcheck",
+            test: "staticcheck -version",
+            "github-token": process.env["GITHUB_TOKEN"],
+        },
+    });
+    let res = await target.run(options);
+    (0, assert_1.default)(res.error == undefined);
+    (0, assert_1.default)(res.isSuccess);
+    (0, assert_1.default)(res.exitCode !== 1);
+    (0, assert_1.default)(res.commands.addedPaths.find((p) => p.includes("staticcheck")) != undefined);
+    return res.stdout;
+}
 async function testNoCache() {
     console.log("================");
     console.log(" TEST: No Cache ");
@@ -69,6 +95,7 @@ async function testNoCache() {
     try {
         await test_limactl(tmpdir, runnerToolCache);
         await test_just(tmpdir, runnerToolCache);
+        await test_staticcheck(tmpdir, runnerToolCache);
     }
     finally {
         await promises_1.default.rm(tmpdir, { recursive: true });
@@ -88,6 +115,9 @@ async function testWithCache() {
         await test_just(tmpdir, runnerToolCache);
         secondRun = await test_just(tmpdir, runnerToolCache);
         (0, assert_1.default)(secondRun?.includes("Found tool in cache just 1.13.0 arm64"));
+        await test_staticcheck(tmpdir, runnerToolCache);
+        secondRun = await test_staticcheck(tmpdir, runnerToolCache);
+        (0, assert_1.default)(secondRun?.includes("Found tool in cache staticcheck 2023.1.3 arm64"));
     }
     finally {
         await promises_1.default.rm(tmpdir, { recursive: true });
