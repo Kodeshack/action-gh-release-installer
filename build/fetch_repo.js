@@ -56,7 +56,9 @@ async function fetchRepo(opts, log) {
     core.info(`Downloading ${asset.browser_download_url}`);
     let downloadPath = await tc.downloadTool(asset.browser_download_url);
     let extractedPath = await tc.extractTar(downloadPath);
-    let cachedPath = await tc.cacheDir(path_1.default.join(extractedPath, path_1.default.dirname(binPath)), bin, release.data.tag_name);
+    let cacheDir = path_1.default.join(extractedPath, path_1.default.dirname(binPath));
+    core.info(`Looking for binary ${cacheDir}/${bin}`);
+    let cachedPath = await tc.cacheDir(cacheDir, bin, release.data.tag_name);
     await addToDirAndTest(cachedPath, opts, log);
 }
 exports.fetchRepo = fetchRepo;
