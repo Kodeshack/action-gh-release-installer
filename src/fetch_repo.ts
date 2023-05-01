@@ -51,11 +51,9 @@ export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
     let downloadPath = await tc.downloadTool(asset.browser_download_url)
     let extractedPath = await tc.extractTar(downloadPath)
 
-    let cachedPath = await tc.cacheDir(
-        path.join(extractedPath, path.dirname(binPath)),
-        bin,
-        release.data.tag_name
-    )
+    let cacheDir = path.join(extractedPath, path.dirname(binPath))
+    core.info(`Looking for binary ${cacheDir}/${bin}`)
+    let cachedPath = await tc.cacheDir(cacheDir, bin, release.data.tag_name)
 
     await addToDirAndTest(cachedPath, opts, log)
 }
