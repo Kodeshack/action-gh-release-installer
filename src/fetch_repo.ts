@@ -39,8 +39,11 @@ export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
 
     let arch = constructArchPattern()
     let platform = constructPlatformPattern()
+    let extension = /\.(tar|bz|gz|tgz|zip)/
 
-    let asset = assets.data.find((a) => arch.test(a.name) && platform.test(a.name))
+    let asset = assets.data.find(
+        (a) => arch.test(a.name) && platform.test(a.name) && extension.test(a.name)
+    )
     if (!asset) {
         throw new Error(
             `can't find release of ${opts.version}/${opts.repo} matching ${opts.version} for ${process.platform} ${process.arch}`
