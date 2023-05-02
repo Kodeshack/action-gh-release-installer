@@ -10,6 +10,13 @@ build:
 test: build
     ts-node src/main.test.ts
 
+test-in-docker: build
+    docker run --rm \
+    -v `pwd`:/action-gh-release-installer \
+    -e GITHUB_TOKEN={{env_var_or_default("GITHUB_TOKEN", "")}} \
+    node:20-alpine3.16 \
+    sh -c "cd /action-gh-release-installer && npm i && ./node_modules/.bin/ts-node src/main.test.ts"
+
 run: build
     rm -rf .tmp
     mkdir -p .tmp/cache .tmp/temp
@@ -24,3 +31,4 @@ fmt:
 
 lint:
     eslint src/*.ts
+

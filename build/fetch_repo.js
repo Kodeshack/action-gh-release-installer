@@ -33,8 +33,11 @@ const tc = __importStar(require("@actions/tool-cache"));
 const exec_1 = require("@actions/exec");
 const path_1 = __importDefault(require("path"));
 async function fetchRepo(opts, log) {
-    let binPath = opts.bin || opts.repo;
+    let execTemplate = template({ arch: arch(), platform: process.platform, version: opts.version });
+    let binPath = execTemplate(opts.bin || opts.repo);
+    console.log("binPath", binPath);
     let bin = binPath.includes("/") ? path_1.default.basename(binPath) : binPath;
+    console.log("bin", bin);
     let repo = { owner: opts.owner, repo: opts.repo };
     let octokit = github.getOctokit(opts.ghToken);
     let release = await octokit.rest.repos.getReleaseByTag({ ...repo, tag: opts.version });
@@ -47,10 +50,10 @@ async function fetchRepo(opts, log) {
         await addToDirAndTest(cachedDir, opts, log);
         return;
     }
-    let arch = constructArchPattern();
-    let platform = constructPlatformPattern();
+    let archPattern = constructArchPattern();
+    let platformPattern = constructPlatformPattern();
     let extension = /\.(tar|bz|gz|tgz|zip)/;
-    let asset = assets.data.find((a) => arch.test(a.name) && platform.test(a.name) && extension.test(a.name));
+    let asset = assets.data.find((a) => archPattern.test(a.name) && platformPattern.test(a.name) && extension.test(a.name));
     if (!asset) {
         throw new Error(`can't find release of ${opts.version}/${opts.repo} matching ${opts.version} for ${process.platform} ${process.arch}`);
     }
@@ -88,5 +91,24 @@ function constructPlatformPattern() {
             return /linux/i;
     }
     throw new Error(`OS ${process.platform} not supported by action`);
+}
+function arch() {
+    switch (process.arch) {
+        case "arm":
+        case "arm64":
+            return "arm64";
+        case "x64":
+            return "amd64";
+    }
+    return process.arch;
+}
+let templateVar = /{{\s*.*?\s*}}/g;
+function template(values) {
+    return (str) => {
+        return str.replace(templateVar, (match) => {
+            let key = match.replace(/[{}]+/g, "").trim();
+            return values[key] ?? match;
+        });
+    };
 }
 //# sourceMappingURL=fetch_repo.js.map

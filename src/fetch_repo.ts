@@ -18,8 +18,12 @@ export interface Logger {
 }
 
 export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
-    let binPath = opts.bin || opts.repo
+    let execTemplate = template({ arch: arch(), platform: process.platform, version: opts.version })
+
+    let binPath = execTemplate(opts.bin || opts.repo)
+    console.log("binPath", binPath)
     let bin = binPath.includes("/") ? path.basename(binPath) : binPath
+    console.log("bin", bin)
 
     let repo = { owner: opts.owner, repo: opts.repo }
     let octokit = github.getOctokit(opts.ghToken)
@@ -37,12 +41,12 @@ export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
         return
     }
 
-    let arch = constructArchPattern()
-    let platform = constructPlatformPattern()
+    let archPattern = constructArchPattern()
+    let platformPattern = constructPlatformPattern()
     let extension = /\.(tar|bz|gz|tgz|zip)/
 
     let asset = assets.data.find(
-        (a) => arch.test(a.name) && platform.test(a.name) && extension.test(a.name)
+        (a) => archPattern.test(a.name) && platformPattern.test(a.name) && extension.test(a.name)
     )
     if (!asset) {
         throw new Error(
@@ -90,4 +94,31 @@ function constructPlatformPattern(): RegExp {
     }
 
     throw new Error(`OS ${process.platform} not supported by action`)
+}
+
+function arch(): string {
+    switch (process.arch) {
+        case "arm":
+        case "arm64":
+            return "arm64"
+        case "x64":
+            return "amd64"
+    }
+
+    return process.arch
+}
+
+let templateVar = /{{\s*.*?\s*}}/g
+
+function template(values: {
+    platform: string
+    arch: string
+    version: string
+}): (s: string) => string {
+    return (str: string) => {
+        return str.replace(templateVar, (match) => {
+            let key = match.replace(/[{}]+/g, "").trim() as keyof typeof values
+            return values[key] ?? match
+        })
+    }
 }

@@ -52,9 +52,28 @@ or
 
 | Name           | Required | Description                                                         | Type   | Default               |
 | -------------- | -------- | ------------------------------------------------------------------- | ------ | --------------------- |
-| `owner`        | yes      | Repository owner user or org                                        | string |                       |
-| `repo`         | yes      | Repository name                                                     | string |                       |
-| `version`      | yes      | Release to install                                                  | string |                       |
-| `bin`          | no       | Binary file (path) to install from the downloaded archive.          | string | `repo`                |
-| `test`         | no       | Test command to run to test the binary, e.g. `limactl -v`           | string | `repo`                |
-| `github-token` | no       | Github token to use to authenticate downloads/prevent rate limiting | string | `${{ github.token }}` |
+| `owner`        | yes      | Repository owner user or org                                                                      | string |                       |
+| `repo`         | yes      | Repository name                                                                                   | string |                       |
+| `version`      | yes      | Release to install                                                                                | string |                       |
+| `bin`          | no       | Binary file (path) to install from the downloaded archive. Can be a template string (see below).  | string | `repo`                |
+| `test`         | no       | Test command to run to test the binary, e.g. `limactl -v`                                         | string | `repo`                |
+| `github-token` | no       | Github token to use to authenticate downloads/prevent rate limiting                               | string | `${{ github.token }}` |
+
+
+### Templating
+
+Some inputs can be template strings with placeholders for `version`, `platform` and `arch`.
+
+#### Example
+
+Given the inputs 
+```yaml
+owner: golangci
+repo: golangci-lint
+version: v1.52.2
+bin: golangci-lint-{{version}}-{{platform}}-{{arch}}/golangci-lint
+test: golangci-lint version
+````
+
+`bin` is a template and would be rendered as (e.g. on an ARM Mac):
+`golangci-lint-v1.52.2-darwin-arm64/golangci-lint`
