@@ -101,6 +101,38 @@ async function test_golangcilint(tmpdir: string, runnerToolCache: string) {
     return res.stdout
 }
 
+async function test_gitfilterrepo(tmpdir: string, runnerToolCache: string) {
+    let target = RunTarget.mainJs("action.yml")
+    let options = RunOptions.create({
+        tempDir: tmpdir,
+        githubServiceEnv: {
+            RUNNER_TOOL_CACHE: runnerToolCache,
+        },
+        fakeFsOptions: {
+            tmpRootDir: tmpdir,
+        },
+        env: {},
+        inputs: {
+            owner: "newren",
+            repo: "git-filter-repo",
+            version: "v2.38.0",
+            bin: "git-filter-repo",
+            test: "git-filter-repo --version",
+            "github-token": process.env["GITHUB_TOKEN"],
+        },
+    })
+
+    let res = await target.run(options)
+
+    assert(res.error == undefined)
+    assert(res.isSuccess)
+    assert(res.exitCode !== 1)
+
+    assert(res.commands.addedPaths.find((p) => p.includes("git-filter-repo")) != undefined)
+
+    return res.stdout
+}
+
 async function testNoCache() {
     console.log("================")
     console.log(" TEST: No Cache ")
@@ -114,6 +146,7 @@ async function testNoCache() {
         await test_just(tmpdir, runnerToolCache)
         await test_staticcheck(tmpdir, runnerToolCache)
         await test_golangcilint(tmpdir, runnerToolCache)
+        await test_gitfilterrepo(tmpdir, runnerToolCache)
     } finally {
         await fs.rm(tmpdir, { recursive: true })
     }
@@ -140,6 +173,10 @@ async function testWithCache() {
         await test_golangcilint(tmpdir, runnerToolCache)
         secondRun = await test_golangcilint(tmpdir, runnerToolCache)
         assert(secondRun?.includes("Found tool in cache golangci-lint 1.52.2 arm64"))
+
+        await test_gitfilterrepo(tmpdir, runnerToolCache)
+        secondRun = await test_gitfilterrepo(tmpdir, runnerToolCache)
+        assert(secondRun?.includes("Found tool in cache git-filter-repo 2.38.0 arm64"))
     } finally {
         await fs.rm(tmpdir, { recursive: true })
     }

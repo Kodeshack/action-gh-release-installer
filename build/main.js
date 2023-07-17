@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 const core = __importStar(require("@actions/core"));
-const fetch_repo_1 = require("./fetch_repo");
+const install_release_1 = require("./install_release");
 async function main() {
     try {
         let owner = core.getInput("owner");
@@ -40,7 +40,7 @@ async function main() {
         if (!version) {
             throw new Error("version input must be set");
         }
-        await (0, fetch_repo_1.fetchRepo)({
+        await (0, install_release_1.installRelease)({
             owner,
             repo,
             version,

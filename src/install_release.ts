@@ -2,9 +2,10 @@ import * as core from "@actions/core"
 import * as github from "@actions/github"
 import * as tc from "@actions/tool-cache"
 import { exec } from "@actions/exec"
+import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
 import path from "path"
 
-export interface FetchRepoOpts {
+export interface InstallReleaseOpts {
     owner: string
     repo: string
     version: string
@@ -17,13 +18,11 @@ export interface Logger {
     info(msg: string): void
 }
 
-export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
+export async function installRelease(opts: InstallReleaseOpts, log?: Logger) {
     let execTemplate = template({ arch: arch(), platform: process.platform, version: opts.version })
 
     let binPath = execTemplate(opts.bin || opts.repo)
-    console.log("binPath", binPath)
     let bin = binPath.includes("/") ? path.basename(binPath) : binPath
-    console.log("bin", bin)
 
     let repo = { owner: opts.owner, repo: opts.repo }
     let octokit = github.getOctokit(opts.ghToken)
@@ -41,13 +40,8 @@ export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
         return
     }
 
-    let archPattern = constructArchPattern()
-    let platformPattern = constructPlatformPattern()
-    let extension = /\.(tar|bz|gz|tgz|zip)/
-
-    let asset = assets.data.find(
-        (a) => archPattern.test(a.name) && platformPattern.test(a.name) && extension.test(a.name)
-    )
+    // try to find either arch and platform specific or any zip otherwise
+    let asset = findAsset(assets.data)
     if (!asset) {
         throw new Error(
             `can't find release of ${opts.version}/${opts.repo} matching ${opts.version} for ${process.platform} ${process.arch}`
@@ -65,7 +59,32 @@ export async function fetchRepo(opts: FetchRepoOpts, log?: Logger) {
     await addToDirAndTest(cachedPath, opts, log)
 }
 
-async function addToDirAndTest(dir: string, opts: FetchRepoOpts, log?: Logger) {
+function findAsset(
+    assets: RestEndpointMethodTypes["repos"]["listReleaseAssets"]["response"]["data"]
+) {
+    let archPattern = constructArchPattern()
+    let platformPattern = constructPlatformPattern()
+    let extension = /\.(tar|bz|gz|tgz|zip)/
+
+    // try to find either arch and platform specific
+    let asset = assets.find(
+        (a) => archPattern.test(a.name) && platformPattern.test(a.name) && extension.test(a.name)
+    )
+
+    if (asset) {
+        return asset
+    }
+
+    // try to find a single archive file
+    let archiveAssets = assets.filter((a) => extension.test(a.name))
+    if (archiveAssets.length === 1) {
+        return archiveAssets[0]
+    }
+
+    return
+}
+
+async function addToDirAndTest(dir: string, opts: InstallReleaseOpts, log?: Logger) {
     core.addPath(dir)
     if (opts.test) {
         await exec(opts.test)

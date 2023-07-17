@@ -1,5 +1,5 @@
 import * as core from "@actions/core"
-import { fetchRepo } from "./fetch_repo"
+import { installRelease } from "./install_release"
 
 export async function main() {
     try {
@@ -18,7 +18,7 @@ export async function main() {
             throw new Error("version input must be set")
         }
 
-        await fetchRepo(
+        await installRelease(
             {
                 owner,
                 repo,
