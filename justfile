@@ -32,3 +32,13 @@ fmt:
 lint:
     eslint src/*.ts
 
+changelog:
+    git-chglog -o CHANGELOG.md
+
+release tag: build changelog
+    git add CHANGELOG.md
+    git commit -m "Generated changelog for {{tag}}"
+    git tag {{tag}}
+    git push
+    git push origin {{tag}}
+
