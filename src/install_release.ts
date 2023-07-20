@@ -50,7 +50,12 @@ export async function installRelease(opts: InstallReleaseOpts, log?: Logger) {
 
     core.info(`Downloading ${asset.browser_download_url}`)
     let downloadPath = await tc.downloadTool(asset.browser_download_url)
-    let extractedPath = await tc.extractTar(downloadPath)
+    let extractedPath: string
+    if (path.extname(asset.browser_download_url) == ".xz") {
+        extractedPath = await tc.extractTar(downloadPath, undefined, "-x")
+    } else {
+        extractedPath = await tc.extractTar(downloadPath)
+    }
 
     let cacheDir = path.join(extractedPath, path.dirname(binPath))
     core.info(`Looking for binary ${cacheDir}/${bin}`)

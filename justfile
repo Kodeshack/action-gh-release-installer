@@ -15,7 +15,7 @@ test-in-docker: build
     -v `pwd`:/action-gh-release-installer \
     -e GITHUB_TOKEN={{env_var_or_default("GITHUB_TOKEN", "")}} \
     node:20-alpine3.16 \
-    sh -c "cd /action-gh-release-installer && npm i && ./node_modules/.bin/ts-node src/main.test.ts"
+    sh -c "apk add python3 git && cd /action-gh-release-installer && npm i && ./node_modules/.bin/ts-node src/main.test.ts"
 
 run: build
     rm -rf .tmp

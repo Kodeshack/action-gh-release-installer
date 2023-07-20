@@ -105,7 +105,7 @@ async function test_gitfilterrepo(tmpdir, runnerToolCache) {
             owner: "newren",
             repo: "git-filter-repo",
             version: "v2.38.0",
-            bin: "git-filter-repo",
+            bin: "git-filter-repo-2.38.0/git-filter-repo",
             test: "git-filter-repo --version",
             "github-token": process.env["GITHUB_TOKEN"],
         },
@@ -128,7 +128,8 @@ async function testNoCache() {
         await test_just(tmpdir, runnerToolCache);
         await test_staticcheck(tmpdir, runnerToolCache);
         await test_golangcilint(tmpdir, runnerToolCache);
-        await test_gitfilterrepo(tmpdir, runnerToolCache);
+        let output = await test_gitfilterrepo(tmpdir, runnerToolCache);
+        console.log("output", output);
     }
     finally {
         await promises_1.default.rm(tmpdir, { recursive: true });

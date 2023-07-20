@@ -55,7 +55,13 @@ async function installRelease(opts, log) {
     }
     core.info(`Downloading ${asset.browser_download_url}`);
     let downloadPath = await tc.downloadTool(asset.browser_download_url);
-    let extractedPath = await tc.extractTar(downloadPath);
+    let extractedPath;
+    if (path_1.default.extname(asset.browser_download_url) == ".xz") {
+        extractedPath = await tc.extractTar(downloadPath, undefined, "-x");
+    }
+    else {
+        extractedPath = await tc.extractTar(downloadPath);
+    }
     let cacheDir = path_1.default.join(extractedPath, path_1.default.dirname(binPath));
     core.info(`Looking for binary ${cacheDir}/${bin}`);
     let cachedPath = await tc.cacheDir(cacheDir, bin, release.data.tag_name);
