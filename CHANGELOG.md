@@ -4,6 +4,12 @@
 ## [Unreleased]
 
 ### Features
+- Add release workflow
+
+
+<a name="v1.4.1"></a>
+## [v1.4.1] - 2023-07-20
+### Features
 - Add test and lint GitHub action
 
 ### Fixes
@@ -48,7 +54,8 @@
 <a name="v1.0.0"></a>
 ## v1.0.0 - 2023-04-17
 
-[Unreleased]: https://github.com/Kodeshack/action-install-gh-release/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/Kodeshack/action-install-gh-release/compare/v1.4.1...HEAD
+[v1.4.1]: https://github.com/Kodeshack/action-install-gh-release/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/Kodeshack/action-install-gh-release/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/Kodeshack/action-install-gh-release/compare/v1...v1.3.0
 [v1]: https://github.com/Kodeshack/action-install-gh-release/compare/v1.2.0...v1
