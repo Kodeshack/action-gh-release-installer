@@ -1,0 +1,61 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    - name: Install just 1.13.0
+      uses: kodeshack/action-install-gh-release@v1
+      with:
+        owner: casey
+        repo: just
+        version: '1.13.0'
+        test: just --version
+    - name: Check out code
+      uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: |
+        npm i --no-fund --no-audit
+        just lint
+
+  Run-Test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    - name: Install just 1.13.0
+      uses: kodeshack/action-install-gh-release@v1
+      with:
+        owner: casey
+        repo: just
+        version: '1.13.0'
+        test: just --version
+    - name: Check out code
+      uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        npm i --no-fund --no-audit
+        just test

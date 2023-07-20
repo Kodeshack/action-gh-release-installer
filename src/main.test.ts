@@ -165,19 +165,19 @@ async function testWithCache() {
     try {
         await test_just(tmpdir, runnerToolCache)
         let secondRun = await test_just(tmpdir, runnerToolCache)
-        assert(secondRun?.includes("Found tool in cache just 1.13.0 arm64"))
+        assert(secondRun?.includes(`Found tool in cache just 1.13.0 ${process.arch}`))
 
         await test_staticcheck(tmpdir, runnerToolCache)
         secondRun = await test_staticcheck(tmpdir, runnerToolCache)
-        assert(secondRun?.includes("Found tool in cache staticcheck 2023.1.3 arm64"))
+        assert(secondRun?.includes(`Found tool in cache staticcheck 2023.1.3 ${process.arch}`))
 
         await test_golangcilint(tmpdir, runnerToolCache)
         secondRun = await test_golangcilint(tmpdir, runnerToolCache)
-        assert(secondRun?.includes("Found tool in cache golangci-lint 1.52.2 arm64"))
+        assert(secondRun?.includes(`Found tool in cache golangci-lint 1.52.2 ${process.arch}`))
 
         await test_gitfilterrepo(tmpdir, runnerToolCache)
         secondRun = await test_gitfilterrepo(tmpdir, runnerToolCache)
-        assert(secondRun?.includes("Found tool in cache git-filter-repo 2.38.0 arm64"))
+        assert(secondRun?.includes(`Found tool in cache git-filter-repo 2.38.0 ${process.arch}`))
     } finally {
         await fs.rm(tmpdir, { recursive: true })
     }
